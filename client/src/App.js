@@ -1,6 +1,7 @@
 // Importing necessary libraries and hooks from React and axios
 import { useState, useEffect } from "react";
 import './App.css';
+import MediaThemeSutro from 'player.style/sutro/react';
 
 const md5 = require('md5')
 
@@ -28,8 +29,7 @@ function App() {
 
       // Set up the parameters for the request
       const params = new URLSearchParams();
-      // params.set('name', file.name);
-      params.set('name', filename);
+      params.set('filename', filename);
       params.set('currentChunkIndex', currentChunkIndex);
       params.set('totalChunks', Math.ceil(file.size / chunkSize));
 
@@ -49,7 +49,7 @@ function App() {
           const isLastChunk = currentChunkIndex === Math.ceil(file.size / chunkSize) - 1;
           // If it is, set the final filename and reset the current chunk index
           if (isLastChunk) {
-            file.finalFilename = res.finalFilename;
+            file.finalFilename = res.filename;
             setCurrentChunkIndex(null);
           } else {
             // If it's not, increment the current chunk index
@@ -83,7 +83,7 @@ function App() {
 
     // If a chunk index is set, read and upload the current chunk
     if (currentChunkIndex != null) readAndUploadCurrentChunk();
-  }, [chunkSize, currentChunkIndex, file])
+  }, [chunkSize, currentChunkIndex, file, filename])
 
   // Render the component
   return (
@@ -96,20 +96,37 @@ function App() {
       </button>
       <div className="files">
         {file && (
-          <a
-            className="file"
-            target="_blank"
-            href={file.finalFilename ? 'http://localhost:4000/uploads/' + file.finalFilename : null}
-            rel="noreferrer"
-          >
+          <>
             <div>{ file.finalFilename ?
             '100%' :
              (<>{Math.round(currentChunkIndex / Math.ceil(file.size / chunkSize) * 100)}%</>)
             }</div>
-            <div className="name">{file.name}</div>
-          </a>
+            <div className="name">
+              <a
+                className="file"
+                target="_blank"
+                href={file.finalFilename ? 'http://localhost:4000/uploads/' + file.finalFilename : null}
+                rel="noreferrer">
+                  {file.name}
+              </a>
+            </div>
+          </>
         )}
       </div>
+
+      <div className="footer">
+        {file && file.finalFilename && (
+          <MediaThemeSutro>
+          <video
+            slot="media"
+            src={'http://localhost:4000/uploads/' + file.finalFilename}
+            playsInline
+            crossOrigin="anonymous"
+          ></video>
+        </MediaThemeSutro>
+        )}
+      </div>
+
     </div>
   );
 }
